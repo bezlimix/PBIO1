@@ -1,5 +1,6 @@
 import random
 import re
+import textwrap
 
 def generate_dna_sequence(length):
     return ''.join(random.choices('ACGT', k=length))
@@ -27,10 +28,31 @@ def calculate_statistics(sequence, name):
 
 def main():
     # Interakcja z użytkownikiem
-    length = int(input("Podaj długość sekwencji: "))
+    # Modyfikacja 1 – dodano walidację długości
+    # ORIGINAL:
+    # length = int(input("Podaj długość sekwencji: "))
+    # MODIFIED (dodano obsługę błędnych danych oraz wymuszenie liczby > 0):
+    while True:
+        try:
+            length = int(input("Podaj długość sekwencji: "))
+            if length <= 0:
+                print("Długość musi być większa od zera.")
+                continue
+            break
+        except ValueError:
+            print("Wprowadź poprawną liczbę całkowitą.")
     seq_id = input("Podaj ID sekwencji: ").strip()
     description = input("Podaj opis sekwencji: ").strip()
-    name = input("Podaj imię: ").strip()
+    #Modyfikacja 2 - walidacja imia
+    # ORIGINAL:
+    # name = input("Podaj imię: ").strip()
+    # MODIFIED (dodano walidację, aby imię zawierało tylko litery):
+    while True:
+        name = input("Podaj imię: ").strip()
+        if not name.isalpha():
+            print("Imię może zawierać tylko litery. Spróbuj ponownie.")
+        else:
+            break
 
     # Generowanie i modyfikacja sekwencji
     dna = generate_dna_sequence(length)
@@ -40,7 +62,12 @@ def main():
     filename = f"{seq_id}.fasta"
     with open(filename, 'w') as fasta_file:
         fasta_file.write(f">{seq_id} {description}\n")
-        fasta_file.write(dna_with_name + '\n')
+        # Modyfikacja 3 – formatowanie FASTA co 60 znaków
+        # ORIGINAL:
+        # fasta_file.write(dna_with_name + '\n')
+        # MODIFIED (zapis sekwencji co 60 znaków, zgodnie ze standardem FASTA):
+        wrapped_sequence = textwrap.fill(dna_with_name, width=60)
+        fasta_file.write(wrapped_sequence + '\n')
 
     print(f"\nSekwencja została zapisana do pliku {filename}")
     calculate_statistics(dna_with_name, name)
